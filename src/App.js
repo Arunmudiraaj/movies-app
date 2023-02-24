@@ -8,6 +8,12 @@ function App() {
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const addMovieHandler = async (data)=>{
+    const moviesData = await fetch('https://movies-4c771-default-rtdb.firebaseio.com/movies.json', {method:'POST',body: JSON.stringify(data)})
+    console.log(moviesData)
+    fetchMoviesHandler()
+    
+  }
   useEffect(()=>{
     fetchMoviesHandler()
   },[])
@@ -15,20 +21,19 @@ function App() {
     setError(null);
     setIsLoading(true);
     try {
-      const rawData = await fetch("https://swapi.dev/api/films/");
+      const rawData = await fetch("https://movies-4c771-default-rtdb.firebaseio.com/movies.json");
       if (!rawData.ok) {
         setError("Something went wrong!");
         throw new Error("Something went wrong!");
       }
+      
       const response = await rawData.json();
-      const myMoviesList = response.results.map((item) => {
-        return {
-          title: item.title,
-          releaseDate: item.release_date,
-          openingText: item.opening_crawl,
-        };
-      });
-      setMovies(myMoviesList);
+      const allmovies = []
+      for (const key in response){
+        allmovies.push(response[key])
+      }
+      console.log(allmovies)
+      setMovies(allmovies);
     } catch (err) {
       setError(err.message);
     }
@@ -37,7 +42,7 @@ function App() {
 
   return (
     <React.Fragment>
-      <InputForm/>
+      <InputForm onAddMovie={addMovieHandler}/>
       <section>
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>
       </section>
